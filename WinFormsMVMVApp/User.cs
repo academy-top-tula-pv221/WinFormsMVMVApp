@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,8 @@ namespace WinFormsMVMVApp
         string name = "";
         int age;
 
-        //public int SelectedId { get; set; }
+        //public int SelectedIndex { get; set; }
+        int selectedIndex;
         public BindingList<User> Users { get; }
         public Group()
         {
@@ -42,14 +44,38 @@ namespace WinFormsMVMVApp
             //SelectedId = 1;
 
             AddCommand = new MainCommand(_ => 
-            {
+            { 
                 Users.Add(new User() { Id = ++globalId, Name = this.Name, Age = this.Age });
                 Name = "";
                 Age = 0;
             });
+
+            DeleteCommand = new MainCommand(obj =>
+            {
+                //int id;
+                //if (obj is int)
+                //    id = (int)obj;
+                if(obj is int id)
+                {
+                    int index = SelectedIndex;
+                    User? user = Users.FirstOrDefault(u => u.Id == id);
+                    if(user != null) { Users.Remove(user); }
+
+                    if (index == Users.Count)
+                        SelectedIndex = Users.Count - 1;
+                    else
+                    {
+                        SelectedIndex = index - 1;
+                        SelectedIndex = index;
+                    }
+                        
+                }
+                    
+            });
         }
         //public User SelectedUser { get => Users.FirstOrDefault(u => u.Id == SelectedId)!; }
         public ICommand AddCommand { get; set; }
+        public ICommand DeleteCommand { set; get; }
 
         public string Name
         {
@@ -63,7 +89,6 @@ namespace WinFormsMVMVApp
                 }
             }
         }
-
         public int Age
         {
             get => age;
@@ -74,6 +99,16 @@ namespace WinFormsMVMVApp
                     age = value;
                     OnPropertyChanged();
                 }
+            }
+        }
+
+        public int SelectedIndex
+        {
+            get => selectedIndex;
+            set
+            {
+                selectedIndex = value;
+                OnPropertyChanged();
             }
         }
 
